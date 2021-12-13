@@ -1,0 +1,22 @@
+{
+  "name": "sticky-message-bot",
+  "version": "1.0.0",
+  "description": "Bot Create By Shuruhatik#0001",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sticky",
+    "eris",
+    "sticky-messages",
+    "sticky-bot"
+  ],
+  "author": "Shuruhatik#0001",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "eris": "^0.16.1",
+    "express": "^4.17.1",
+    "st.db": "^3.3.1"
+  }
+}
