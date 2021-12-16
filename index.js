@@ -1,7 +1,7 @@
 Object.entries(process.env).filter(e => e[0].startsWith("token")).forEach((token, indexArray) => {
   const Eris = require("eris");
   const bot = new Eris(token[1], { intents: 32509 });
-  const app = require('express')().get('/', async (r, s) => s.send(require("./package.json").description)).listen(3000);
+  const app = require('express')().get('/', async (r, s) => s.send({ welcome: require("./package.json").description })).listen(3000);
   const Database = require("st.db");
   const db = new Database({
     path: 'data.json',
@@ -64,18 +64,19 @@ Object.entries(process.env).filter(e => e[0].startsWith("token")).forEach((token
         key: `stickychannel_${bot.user.id}_${msg.channel.id}`,
         decrypt: true
       })
-      await bot.deleteMessage(msg.channel.id, data.msgId).catch(e => { })
-      let msgId;
-      try {
-        msgId = await bot.createMessage(msg.channel.id, JSON.parse(process.env[data.msg]));
-      } catch (e) {
-        msgId = await bot.createMessage(msg.channel.id, data.msg);
-      }
-      data['msgId'] = msgId.id
-      await db.set({
-        key: `stickychannel_${bot.user.id}_${msg.channel.id}`,
-        value: data
-      })
+      await bot.deleteMessage(msg.channel.id, data.msgId).then(async () => {
+        let msgId;
+        try {
+          msgId = await bot.createMessage(msg.channel.id, JSON.parse(process.env[data.msg]));
+        } catch (e) {
+          msgId = await bot.createMessage(msg.channel.id, data.msg);
+        }
+        data['msgId'] = msgId.id
+        await db.set({
+          key: `stickychannel_${bot.user.id}_${msg.channel.id}`,
+          value: data
+        })
+      }).catch(e => { })
     }
   });
 
@@ -113,7 +114,7 @@ Object.entries(process.env).filter(e => e[0].startsWith("token")).forEach((token
       } else if (interaction.data.name == "sticky_remove") {
         if (!interaction.member.permission.has("administrator")) return await interaction.createMessage(`:x: ليس لديك صلاحيات لقيام بذلك`);
         let channelId = interaction.data.options[0].value
-        if (await db.has(`stickychannel_${channelId}`) != true) return await interaction.createMessage(`:x: لا توجد رسائل ثابتة تم إنشاؤها فعليًا في ذاكرة القراءة فقط`);
+        if (await db.has(`stickychannel_${bot.user.id}_${channelId}`) != true) return await interaction.createMessage(`:x: لا توجد رسائل ثابتة تم إنشاؤها فعليًا في ذاكرة القراءة فقط`);
         await db.delete({
           key: `stickychannel_${bot.user.id}_${channelId}`
         })
